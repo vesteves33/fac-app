@@ -1,13 +1,21 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, model_validator
 from typing import Optional, Dict, Any
 
 class AWSConexaoModel(BaseModel):
-    aws_access_key_id: str
-    aws_secret_access_key: str
-    region_name: str
+    aws_access_key_id: Optional[str] = None
+    aws_secret_access_key: Optional[str] = None
+    region_name: Optional[str] = None
     aws_session_token: Optional[str] = None # Token opcional para credenciais temporárias
 
+
 class GCPConexaoModel(BaseModel):
-    project_id: str
-    service_account_path: str
-    service_account_info: dict # JSON com as informações da conta de serviço
+    project_id: Optional[str] = None
+    service_account_path: Optional[str] = None
+    service_account_info: Optional[Dict[str, Any]] = None # JSON com as informações da conta de serviço
+
+    @model_validator(mode='before')
+    @classmethod
+    def check_exclusive_auth_methods(cls, values: Dict[str, Any]) -> Dict[str, Any]:
+        if values.get('service_account_path') and values.get('service_account_info'):
+            raise ValueError('service_account_path e service_account_info são mutuamente exclusivos')
+        return values

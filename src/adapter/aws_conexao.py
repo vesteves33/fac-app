@@ -1,8 +1,8 @@
 from typing import Any
-from boto3 import Session
+from aioboto3 import Session
+from src.config.logger import logger
 from src.port.conexao import ConexaoPort
 from src.model.conexao import AWSConexaoModel
-from src.config.logger import logger
 from botocore.exceptions import NoCredentialsError, ClientError
 
 logger = logger("aws-conector-adapter")
@@ -10,37 +10,42 @@ logger = logger("aws-conector-adapter")
 class AWSConexao(ConexaoPort):
     def __init__(self, conexao_model: AWSConexaoModel):
         self.conexao_model = conexao_model
-        self.session = Session(
-            aws_access_key_id=conexao_model.aws_access_key_id,
-            aws_secret_access_key=conexao_model.aws_secret_access_key,
-            region_name=conexao_model.region_name
-        )
-    
-    #Interface methods 
+       
+        # Utilizando Session da lib aioboto3 que permite Assincronismos
+        session_kwargs = conexao_model.model_dump(exclude_none=True)
+        self.session = Session(**session_kwargs)
+        self._authenticated = False
+
+    #Interface methods
     async def autenticar(self) -> bool:
         try:
-            sts_client = self.session.client('sts')
-            sts_client.get_caller_identity()
+            async with self.session.client('sts') as sts_client:
+                await sts_client.get_caller_identity()
             logger.info("Autenticação AWS bem-sucedida.")
+            self._authenticated = True
+           
             return True
-        
+       
         except NoCredentialsError:
             logger.error("Erro de Autenticação AWS: Credenciais AWS não encontradas.")
             raise PermissionError("Credenciais AWS não encontradas.")
-        
+       
         except ClientError as e:
-            logger.error(f"Erro de Autenticação AWS: {e}")
-            return False
-        
+            error_code = e.response.get("Error", {}).get("Code")
+           
+            if error_code == "InvalidClientTokenId":
+                logger.error(f"Erro de autenticação AWS: Credenciais inválidas.")
+                raise PermissionError(f"Credenciais AWS inválidas: {e}")
+           
+            logger.error(f"Erro de Cliente AWS: {e}")
+            raise PermissionError(f"Falha ao autenticar com AWS: {e}")
+       
         except Exception as e:
-            logger.exception(f"Falha na autenticação AWS: {e}")
-            return False
-    
-    async def client(self, aws_access_key_id: str, aws_secret_access_key: str, region_name: str) -> Any:
-        self.session = Session(
-            aws_access_key_id=aws_access_key_id,
-            aws_secret_access_key=aws_secret_access_key,
-            region_name=region_name
-        )
+            logger.exception(f"Erro inesperado na autenticação AWS: {e}")
+            raise ConnectionError(f"Erro de conexão AWS: {e}")
+   
+    async def client(self) -> Any:
+        if not self._authenticated:
+            raise ConnectionError('Sessão não autenticada. Utilize o metodo autenticar() primeiro')
+       
         return self.session
-
