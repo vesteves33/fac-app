@@ -50,11 +50,11 @@ class GCPConexao(ConexaoPort):
                 if not self.project_id and default_project_id:
                     self.project_id = default_project_id
 
-                if not self.credentials:
-                    raise GoogleAuthError("Nenhuma credencial encontrada via Application Default Credentials (ADC).")
+            if not self.credentials:
+                raise GoogleAuthError("Nenhuma credencial encontrada via Application Default Credentials (ADC).")
         
-                if not self.project_id:
-                    logger.warning("Autenticação GCP realizada, mas o project_id não foi fornecido.")
+            if not self.project_id:
+                logger.warning("Autenticação GCP realizada, mas o project_id não foi fornecido.")
             
             logger.info(f"Autenticação GCP realizada com sucesso. Projeto: {self.project_id}")
             self._authenticated = True
