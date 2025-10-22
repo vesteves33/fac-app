@@ -107,8 +107,9 @@ class Logger:
         method: str,
         path: str,
         status_code: int,
-        duration_ms: float,
-        client_ip: Optional[str] = None
+        duration_ms: Optional[float] = None,
+        client_ip: Optional[str] = None,
+        message: Optional[str] = None
     ) -> None:
         """
         Loga informações de requisição HTTP
@@ -124,11 +125,17 @@ class Logger:
         
         log_message = (
             f"[{method}] {path} - Status: {status_code} - "
-            f"Duration: {duration_ms:.2f}ms"
         )
         
         if client_ip:
-            log_message += f" - Client: {client_ip}"
+            log_message += f"Client: {client_ip} - "
+            
+        if duration_ms:
+            log_message += f"Duration: {duration_ms:.2f}ms - "
+        
+        if message:
+            log_message += f"Message: {message}"
+
         
         if status_code >= 500:
             logger.error(log_message)

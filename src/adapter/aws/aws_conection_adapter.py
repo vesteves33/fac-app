@@ -1,23 +1,22 @@
 from typing import Any
 from aioboto3 import Session
 from src.config.logger import logger
-from src.port.conexao import ConexaoPort
-from src.model.conexao import AWSConexaoModel
+from src.port.conection_port import ConectionPort
+from src.model.conection_model import AWSConectionModel
 from botocore.exceptions import NoCredentialsError, ClientError
 
 logger = logger("aws-conector-adapter")
 
-class AWSConexao(ConexaoPort):
-    def __init__(self, conexao_model: AWSConexaoModel):
-        self.conexao_model = conexao_model
+class AWSConection(ConectionPort):
+    def __init__(self, conection_model: AWSConectionModel):
+        self.conection_model = conection_model
        
-        # Utilizando Session da lib aioboto3 que permite Assincronismos
-        session_kwargs = conexao_model.model_dump(exclude_none=True)
+        session_kwargs = conection_model.model_dump(exclude_none=True)
         self.session = Session(**session_kwargs)
         self._authenticated = False
 
     #Interface methods
-    async def autenticar(self) -> bool:
+    async def authenticate(self) -> bool:
         try:
             async with self.session.client('sts') as sts_client:
                 await sts_client.get_caller_identity()

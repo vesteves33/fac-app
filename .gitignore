@@ -12,3 +12,10 @@ wheels/
 # Logs
 logs/
 *.log
+
+# Environment variables
+.env
+
+# UV package files
+uvicorn*.log
+uv.lock

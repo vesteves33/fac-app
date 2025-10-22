@@ -2,39 +2,39 @@ import asyncio
 from google.auth import default
 from src.config.logger import logger
 from typing import Optional, Any, Tuple
-from src.port.conexao import ConexaoPort
 from google.oauth2 import service_account
-from src.model.conexao import GCPConexaoModel
 from google.auth.credentials import Credentials
+from src.port.conection_port import ConectionPort
 from google.auth.exceptions import  GoogleAuthError
+from src.model.conection_model import GCPConectionModel
 
 logger = logger("gcp-conector-adapter")
 
-class GCPConexao(ConexaoPort):
-    def __init__(self, conexao_model: GCPConexaoModel):
-        self.conexao_model = conexao_model
+class GCPConection(ConectionPort):
+    def __init__(self, conection_model: GCPConectionModel):
+        self.conection_model = conection_model
         self.credentials: Optional[Credentials] = None
-        self.project_id: Optional[str] = conexao_model.project_id
+        self.project_id: Optional[str] = conection_model.project_id
 
         self._authenticated = False
     
     #Interface methods
-    async def autenticar(self) -> bool:
+    async def authenticate(self) -> bool:
         try:
-            if self.conexao_model.service_account_info:
+            if self.conection_model.service_account_info:
                 logger.info("Autenticação GCP realizada com service_account_info.")
                 self.credentials = service_account.Credentials.from_service_account_info(
-                    self.conexao_model.service_account_info
+                    self.conection_model.service_account_info
                 )
             
                 if not self.project_id and hasattr(self.credentials, 'project_id'):
                     self.project_id = self.credentials.project_id
 
-            elif self.conexao_model.service_account_path:
-                logger.info(f"Autenticação GCP realizada com service_account_path: {self.conexao_model.service_account_path}...")
+            elif self.conection_model.service_account_path:
+                logger.info(f"Autenticação GCP realizada com service_account_path: {self.conection_model.service_account_path}...")
                 
                 self.credentials = await asyncio.to_thread(service_account.Credentials.from_service_account_file,
-                    self.conexao_model.service_account_path
+                    self.conection_model.service_account_path
                 )
                 if not self.project_id and hasattr(self.credentials, 'project_id'):
                     self.project_id = self.credentials.project_id
@@ -61,8 +61,8 @@ class GCPConexao(ConexaoPort):
             return True
         
         except FileNotFoundError:
-            logger.error(f"Arquivo de conta de serviço não encontrado: {self.conexao_model.service_account_path}")
-            raise FileNotFoundError(f"Arquivo de conta de serviço não encontrado: {self.conexao_model.service_account_path}")
+            logger.error(f"Arquivo de conta de serviço não encontrado: {self.conection_model.service_account_path}")
+            raise FileNotFoundError(f"Arquivo de conta de serviço não encontrado: {self.conection_model.service_account_path}")
 
         except GoogleAuthError as e:
             logger.error(f"Erro de autenticação GCP. Falha ao carregar credenciais: {e}")

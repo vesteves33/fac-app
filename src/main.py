@@ -4,6 +4,10 @@ from pkgutil import iter_modules
 from importlib import import_module
 from src.config.logger import logger
 from fastapi.responses import RedirectResponse
+from src.config.settings import get_settings
+
+logger = logger("main")
+settings = get_settings()
 
 app = FastAPI(
     title="FaC - FinOps as Code application",
@@ -12,8 +16,6 @@ app = FastAPI(
     root_path='./'
 )
 
-logger = logger("main")
-
 def load_routes() -> None:
     path = Path(__file__).parent / "router"
 
@@ -21,7 +23,6 @@ def load_routes() -> None:
         logger.error('Modulo de rotas da aplicação não encontrado')
         return
     
-    # Detecta o prefixo do módulo baseado em __package__
     # Se __package__ é 'src', usa 'src.router', senão usa 'router'
     module_prefix = f"{__package__}.router" if __package__ else "router"
     

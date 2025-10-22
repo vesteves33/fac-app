@@ -5,7 +5,6 @@
 A classe `Logger` encapsula toda a funcionalidade de logging da aplicação em uma interface orientada a objetos, facilitando o uso e manutenção.
 
 ## 🏗️ Estrutura da Classe
-
 ```python
 class Logger:
     - __init__()           # Inicializa o sistema de logging
@@ -23,7 +22,6 @@ class Logger:
 ## 🚀 Como Usar
 
 ### Método 1: Usando a Instância Global (Recomendado)
-
 ```python
 from src.config.logger import logger
 
@@ -52,7 +50,6 @@ except Exception as exc:
 ```
 
 ### Método 2: Criar Instância Customizada
-
 ```python
 from src.config.logger import Logger
 
@@ -73,7 +70,6 @@ payment_logger.error("Falha na transação")
 ## 📝 Exemplos Práticos por Cenário
 
 ### 1. Em Rotas do FastAPI
-
 ```python
 from fastapi import APIRouter, HTTPException
 from src.config.logger import logger
@@ -106,7 +102,6 @@ async def create_user(user_data: dict):
 ```
 
 ### 2. Em Serviços/Business Logic
-
 ```python
 from src.config.logger import logger
 
@@ -139,7 +134,6 @@ class UserService:
 ```
 
 ### 3. Em Middleware
-
 ```python
 import time
 from fastapi import Request
@@ -187,7 +181,6 @@ class CustomLoggingMiddleware(BaseHTTPMiddleware):
 ```
 
 ### 4. Em Tarefas Background/Async
-
 ```python
 import asyncio
 from src.config.logger import logger
@@ -220,7 +213,6 @@ class BackgroundTaskProcessor:
 ```
 
 ### 5. Em Testes Unitários
-
 ```python
 import pytest
 from src.config.logger import logger
@@ -279,8 +271,9 @@ logger.log_request(
     method="POST",              # Método HTTP
     path="/api/users",          # Caminho
     status_code=201,            # Status code
-    duration_ms=123.45,         # Duração em ms
+    duration_ms=123.45,         # Duração em ms (Opctional)
     client_ip="192.168.1.100"   # IP do cliente (opcional)
+    message="Text message"      # Mensagem adaptada ao contexto do uso (Opcional)
 )
 ```
 

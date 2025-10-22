@@ -8,4 +8,5 @@ dependencies = [
     "aioboto3>=15.4.0",
     "fastapi[standard]>=0.119.0",
     "google-auth>=2.41.1",
+    "pydantic-settings>=2.11.0",
 ]

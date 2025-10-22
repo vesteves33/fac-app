@@ -1,10 +1,10 @@
 from typing import Any
 from abc import ABC, abstractmethod
 
-class ConexaoPort(ABC):
+class ConectionPort(ABC):
 
     @abstractmethod
-    async def autenticar(self) -> bool:
+    async def authenticate(self) -> bool:
         ...
     
     @abstractmethod
