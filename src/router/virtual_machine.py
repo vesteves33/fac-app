@@ -1,5 +1,9 @@
 from src.config.logger import Logger
-from fastapi import APIRouter, HTTPException
+from src.config.settings import settings
+from fastapi import APIRouter, HTTPException, Depends
+from src.model.virtual_machine_model import VirtualMachineModel
+from src.service.virtual_machine_service import VirtualMachineService
+from src.dependencies.aws_vm_di import get_aws_virtual_machine_service
 
 router = APIRouter(
     prefix="/virtual-machine",
@@ -22,11 +26,15 @@ async def check_virtual_machine_router() -> dict:
 
 # # ===== Endpoints AWS EC2 =====
 @router.get("/ec2/instances")
-async def list_ec2_instances():
-    logger.log_request(method="GET", path="/ec2/instances", status_code=200, message="List EC2 Instances")
+async def list_ec2_instances(
+    service: VirtualMachineService = Depends(get_aws_virtual_machine_service)
+):
+    logger.log_request(method="GET", path="/ec2/instances", status_code=200, message="List AWS EC2 Instances")
     
     try:
-        instances = ['instance1', 'instance2', 'instance3']
+        params = VirtualMachineModel(region=settings.AWS_REGION)
+        
+        instances = await service.list_instances(params)
         return {'instances': instances}
     
     except Exception as exc:
@@ -57,23 +65,16 @@ async def list_ec2_instances():
 # # =============================
 
 # # ===== Endpoints GCP GCE =====
-# @router.get("/gce/instances")
-# async def list_gce_instances(
-#     region: Optional[str] = Query(None, description="Região AWS"),
-#     state: Optional[InstanceState] = Query(None, description="Filtrar por estado"),
-#     tag_key: Optional[str] = Query(None, description="Chave da tag para filtro"),
-#     tag_value: Optional[str] = Query(None, description="Valor da tag para filtro"),
-#     include_terminated: bool = Query(False, description="Incluir instâncias terminadas"),
-#     service: EC2Service = Depends(get_ec2_service)
-# ):
-#     logger.log_request(f"GET /gce/instances - Region: {region}, State: {state}")
+@router.get("/gce/instances")
+async def list_gce_instances():
+    logger.log_request(method="GET", path="/gce/instances", status_code=200, message="List GCP GCE Instances")
     
-#     try:
-#         ...
+    try:
+        ...
     
-#     except Exception as exc:
-#         logger.log_exception(exc, logger_name="router.ec2")
-#         raise HTTPException(status_code=500, detail="Erro interno ao listar instâncias")
+    except Exception as exc:
+        logger.log_exception(exc, logger_name="router.gce")
+        raise HTTPException(status_code=500, detail="Erro interno ao listar instâncias")
 
 # @router.get("/gce/instances/{instance_id}")
 # async def get_gce_instance(

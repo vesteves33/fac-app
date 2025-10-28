@@ -4,7 +4,7 @@ from src.model.virtual_machine_model import VirtualMachineModel
 
 class VirtualMachinePort(ABC): 
     @abstractmethod
-    async def list_instances(self, instance_infos:VirtualMachineModel) -> List[dict]:
+    async def list_instances(self, instance_infos:VirtualMachineModel) -> dict:
         ...
     
     @abstractmethod
